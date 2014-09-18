@@ -23,5 +23,8 @@
     "directiv-test-benchmark": "^0.1.0",
     "mocha": "^1.21.4",
     "should": "^4.0.4"
+  },
+  "dependencies": {
+    "lang-js-translate": "^0.1.0"
   }
 }
