@@ -46,12 +46,12 @@ function relative(strings, locale, opts) {
     compile(strings, locale, 'past', fns, opts);
   }
 
-  compile(strings, locale, 's', fns, opts);
-  compile(strings, locale, 'm', fns, opts);
-  compile(strings, locale, 'h', fns, opts);
-  compile(strings, locale, 'd', fns, opts);
-  compile(strings, locale, 'M', fns, opts);
-  compile(strings, locale, 'y', fns, opts);
+  compile(strings, locale, 's', fns, opts, removeTense);
+  compile(strings, locale, 'm', fns, opts, removeTense);
+  compile(strings, locale, 'h', fns, opts, removeTense);
+  compile(strings, locale, 'd', fns, opts, removeTense);
+  compile(strings, locale, 'M', fns, opts, removeTense);
+  compile(strings, locale, 'y', fns, opts, removeTense);
 
   /**
    * Return a translated relative time based on the diff (in seconds)
@@ -99,8 +99,10 @@ function relative(strings, locale, opts) {
  * @param {Object} opts
  */
 
-function compile(strings, locale, prop, fns, opts) {
-  var val = strings[prop];
+function compile(strings, locale, prop, fns, opts, removeTense) {
+  var val = removeTense ?
+        strings[prop + '-'] || strings[prop] :
+        strings[prop];
   if (!val) throw new Error('Missing "' + prop + '" for "' + locale + '"');
   fns[prop] = translate(val, locale, opts);
 }
