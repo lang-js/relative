@@ -1,0 +1,28 @@
+{
+  "future": "in %{time}",
+  "past": "%{time} ago",
+  "s": [
+    "a second",
+    "%{time} seconds"
+  ],
+  "m": [
+    "a minute",
+    "%{time} minutes"
+  ],
+  "h": [
+    "an hour",
+    "%{time} hours"
+  ],
+  "d": [
+    "a day",
+    "%{time} days"
+  ],
+  "M": [
+    "a month",
+    "%{time} months"
+  ],
+  "y": [
+    "a year",
+    "%{time} years"
+  ]
+}
