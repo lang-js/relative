@@ -1,0 +1,50 @@
+{
+  "+s": [
+    "in a second",
+    "in %{time} seconds"
+  ],
+  "-s": [
+    "a second ago",
+    "%{time} seconds ago"
+  ],
+  "+m": [
+    "in a minute",
+    "in %{time} minutes"
+  ],
+  "-m": [
+    "a minute ago",
+    "%{time} minutes ago"
+  ],
+  "+h": [
+    "in an hour",
+    "in %{time} hours"
+  ],
+  "-h": [
+    "an hour ago",
+    "%{time} hours ago"
+  ],
+  "+d": [
+    "in a day",
+    "in %{time} days"
+  ],
+  "-d": [
+    "a day ago",
+    "%{time} days ago"
+  ],
+  "+M": [
+    "in a month",
+    "in %{time} months"
+  ],
+  "-M": [
+    "a month ago",
+    "%{time} months ago"
+  ],
+  "+y": [
+    "in a year",
+    "in %{time} years"
+  ],
+  "-y": [
+    "a year ago",
+    "%{time} years ago"
+  ]
+}

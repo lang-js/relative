@@ -1,4 +1,6 @@
 {
+  "future": "in %{time}",
+  "past": "%{time} ago",
   "s": [
     "a second",
     "%{time} seconds"

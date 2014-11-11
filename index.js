@@ -34,24 +34,18 @@ var defaultLimits = [
 
 function relative(strings, locale, opts) {
   opts = opts || {};
-  var key = opts.pluralKey = opts.pluralKey || 'time';
+  var key = opts.pluralKey = opts.pluralKey || strings._plural_key || 'time';
   var limits = opts.limits || defaultLimits;
 
-  var removeTense = !strings.future && !strings.past || opts.removeTense;
+  var past = {};
+  var future = {};
 
-  var fns = {};
-
-  if (!removeTense) {
-    compile(strings, locale, 'future', fns, opts);
-    compile(strings, locale, 'past', fns, opts);
-  }
-
-  compile(strings, locale, 's', fns, opts, removeTense);
-  compile(strings, locale, 'm', fns, opts, removeTense);
-  compile(strings, locale, 'h', fns, opts, removeTense);
-  compile(strings, locale, 'd', fns, opts, removeTense);
-  compile(strings, locale, 'M', fns, opts, removeTense);
-  compile(strings, locale, 'y', fns, opts, removeTense);
+  compile(strings, locale, 's', past, future, key, opts);
+  compile(strings, locale, 'm', past, future, key, opts);
+  compile(strings, locale, 'h', past, future, key, opts);
+  compile(strings, locale, 'd', past, future, key, opts);
+  compile(strings, locale, 'M', past, future, key, opts);
+  compile(strings, locale, 'y', past, future, key, opts);
 
   /**
    * Return a translated relative time based on the diff (in seconds)
@@ -60,32 +54,17 @@ function relative(strings, locale, opts) {
    * @return {Array}
    */
 
-  return function(diff) {
+  return function(params) {
+    var diff = getDiff(key, params);
+    if (diff === null) throw new Error('Missing relative time key "' + key + '"');
     var duration = Math.abs(diff);
 
-    var time;
-    for (var i = 0, l = limits.length, t; i < l; i++) {
+    for (var i = 0, l = limits.length, t, fn; i < l; i++) {
       t = limits[i];
       if (t.limit < duration) continue;
-      time = fns[t.label](Math.floor(duration / t.div));
-      break;
+      fn = diff > 0 ? future[t.label] : past[t.label];
+      return fn(createParam(Math.floor(duration / t.div), key, params));
     }
-
-    // just return the time without the tense
-    if (removeTense) return time;
-
-    var tense = fns[diff > 0 ? 'future' : 'past'];
-    var res = tense(createParam(time, key));
-
-    // flatten the result
-    var arr = [];
-    for (i = 0, l = res.length, t; i < l; i++) {
-      t = res[i];
-      if (Array.isArray(t)) Array.prototype.push.apply(arr, t);
-      else arr.push(t);
-    }
-
-    return arr;
   };
 }
 
@@ -95,16 +74,88 @@ function relative(strings, locale, opts) {
  * @param {Object} strings
  * @param {String} locale
  * @param {String} prop
- * @param {Object} fns
+ * @param {Object} past
+ * @param {Object} future
  * @param {Object} opts
  */
 
-function compile(strings, locale, prop, fns, opts, removeTense) {
-  var val = removeTense ?
-        strings[prop + '-'] || strings[prop] :
-        strings[prop];
-  if (!val) throw new Error('Missing "' + prop + '" for "' + locale + '"');
-  fns[prop] = translate(val, locale, opts);
+function compile(strings, locale, prop, past, future, key, opts) {
+  var str = strings[prop];
+
+  if (str && strings.past && strings.future) return compileTenses(strings, str, locale, prop, past, future, key, opts);
+
+  if (str) return past[prop] = future[prop] = translate(str, locale, opts);
+
+  if (strings['+' + prop] && strings['-' + prop]) {
+    past[prop] = translate(strings['-' + prop], locale, opts);
+    future[prop] = translate(strings['+' + prop], locale, opts);
+    return;
+  }
+
+  if (!str) throw new Error('Missing "' + prop + '" for "' + locale + '"');
+}
+
+/**
+ * Compile a property, merging in future and past strings
+ *
+ * @param {Object} strings
+ * @param {String} str
+ * @param {String} locale
+ * @param {String} prop
+ * @param {Object} past
+ * @param {Object} future
+ * @param {String} key
+ * @param {Object} opts
+ */
+
+function compileTenses(strings, str, locale, prop, past, future, key, opts) {
+  var p = translate(strings.past, locale, opts);
+  var f = translate(strings.future, locale, opts);
+  var t = translate(str, locale, opts);
+
+  past[prop] = function(params) {
+    var time = t(params);
+    var res = p(createParam(time, key, params));
+    return flatten(res);
+  };
+
+  future[prop] = function(params) {
+    var time = t(params);
+    var res = f(createParam(time, key, params));
+    return flatten(res);
+  };
+}
+
+/**
+ * Flatten an array of arrays
+ *
+ * @param {Array} a
+ * @return {Array}
+ */
+
+function flatten(a) {
+  var arr = [];
+  for (var i = 0, l = a.length, t; i < l; i++) {
+    t = a[i];
+    if (Array.isArray(t)) Array.prototype.push.apply(arr, t);
+    else arr.push(t);
+  }
+
+  return arr;
+}
+
+/**
+ * Get the difference from the params
+ *
+ * @param {String} key
+ * @param {Object} params
+ * @return {Number}
+ */
+
+function getDiff(key, params) {
+  if (typeof params === 'number') return params;
+  if (!params) return null;
+  return params[key];
 }
 
 /**
@@ -115,8 +166,15 @@ function compile(strings, locale, prop, fns, opts, removeTense) {
  * @return {Object}
  */
 
-function createParam(time, key) {
-  var params = {};
-  params[key] = time;
-  return params;
+function createParam(time, key, params) {
+  var cloned = {};
+  if (typeof params === 'number') {
+    params = {};
+  } else {
+    for (var k in params) {
+      cloned[k] = params[k];
+    }
+  }
+  cloned[key] = time;
+  return cloned;
 }
