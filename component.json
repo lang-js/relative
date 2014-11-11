@@ -1,0 +1,13 @@
+{
+  "name": "lang-js-relative",
+  "version": "1.0.1",
+  "description": "relative times",
+  "repo": "lang-js/relative",
+  "main": "index.js",
+  "author": "Cameron Bytheway <bytheway.cameron@gmail.com>",
+  "scripts": ["index.js"],
+  "license": "MIT",
+  "dependencies": {
+    "lang-js/translate": "^1.0.2"
+  }
+}

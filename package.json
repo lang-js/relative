@@ -1,6 +1,6 @@
 {
   "name": "lang-js-relative",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "relative times",
   "main": "index.js",
   "scripts": {
